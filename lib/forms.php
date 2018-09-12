@@ -11,7 +11,7 @@ class FormBuild extends Connection {
     <p>The WuTang Clan is working on a new documentary and is asking their fans to submit fan art or Tattoos for possible inclusion in the documentary. If you want to be a part of history, fill out the form below and show us what you got! Remember that you need to legally own the artwork or tatoo and be able to prove it</p>
     <hr/>
     <!-- <button onclick="getLocation()">Find Me</button> -->
-    <form method="post" enctype="multipart/form-data" id="summary" class="form-horizontal">
+    <form method="post" enctype="multipart/form-data" id="summary" class="">
     <!-- <input type="hidden" value="" name="latitude" id="latitude">
         <input type="hidden" value="" name="longitude" id="longitude"> -->
         <div class="form-group">
