@@ -397,7 +397,7 @@ class FormBuild extends Connection {
     $city_name            = mysqli_real_escape_string($this->dbc,$_POST['city_name']);
     $state_abbreviation   = mysqli_real_escape_string($this->dbc,$_POST['state_abbreviation']);
     $zipcode              = mysqli_real_escape_string($this->dbc,$_POST['zipcode']);
-    $media_type           = mysqli_real_escape_string($this->dbc,$_POST['media_type']);
+    $media_type           = $_POST['media_type']; //mysqli_real_escape_string($this->dbc,);
     //$art_file             = mysqli_real_escape_string($this->dbc,$_POST['art_file']);
 
 
@@ -406,34 +406,49 @@ class FormBuild extends Connection {
 
     
 
-
-
-        $photo_old_1 = time();
-        if($_FILES['art_file']['size'] != 0)
+        if(!empty($_FILES['art_file']))
         {
-                $targetfolder = $_SERVER['DOCUMENT_ROOT']."/wu-art/files/";
-                $targetfolder = $targetfolder . $this->clean_seo_strings( basename( $_FILES['art_file']['name']) );
-                $ok=1;
-                $file_type=$_FILES['art_file']['type'];
+          $path = $_SERVER['DOCUMENT_ROOT']."/wu-art/files/";
+          $path = $path . $this->clean_seo_strings( basename( $_FILES['art_file']['name']) );
 
-                if ($file_type=="application/pdf" || $file_type=="image/gif" || $file_type=="image/jpeg") 
-                {
-                    if(move_uploaded_file($_FILES['art_file']['tmp_name'], $targetfolder))
-                    {
-                        $art_file_new = $this->clean_seo_strings( basename( $_FILES['art_file']['name']) );
-                    }
-                    else {
-                        $art_file_new = $photo_old_1;
-                    }
-                }
-                else {
-                    //echo "You may only upload PDFs, JPEGs or GIF files.<br>";
-                }
+          if(move_uploaded_file($_FILES['art_file']['tmp_name'], $path)) {
+
+            $art_file_new = $this->clean_seo_strings( basename( $_FILES['art_file']['name']) );
+
+
+          } else{
+            $art_file_new = time().'.jpg';
+          }
         }
-        else
-        {
-          $art_file_new = $photo_old_1;
-        }
+
+
+
+        // $photo_old_1 = time();
+        // if($_FILES['art_file']['size'] != 0)
+        // {
+        //         $targetfolder = $_SERVER['DOCUMENT_ROOT']."/wu-art/files/";
+        //         $targetfolder = $targetfolder . $this->clean_seo_strings( basename( $_FILES['art_file']['name']) );
+        //         $ok=1;
+        //         $file_type=$_FILES['art_file']['type'];
+
+        //         if ($file_type=="application/x-png" ||  $file_type=="application/png" || $file_type=="image/gif" || $file_type=="image/jpeg") 
+        //         {
+        //             if(move_uploaded_file($_FILES['art_file']['tmp_name'], $targetfolder))
+        //             {
+        //                 $art_file_new = $this->clean_seo_strings( basename( $_FILES['art_file']['name']) );
+        //             }
+        //             else {
+        //                 $art_file_new = $photo_old_1;
+        //             }
+        //         }
+        //         else {
+        //             //echo "You may only upload PDFs, JPEGs or GIF files.<br>";
+        //         }
+        // }
+        // else
+        // {
+        //   $art_file_new = $photo_old_1;
+        // }
     
 
     //     echo '<br/>'.$full_name;
@@ -494,8 +509,7 @@ class FormBuild extends Connection {
 
   public function clean_seo_strings($str){
     $cleanedstr = preg_replace(
-      "/(\t|\n|\v|\f|\r| |\xC2\x85|\xc2\xa0|\xe1\xa0\x8e|\xe2\x80[\x80-\x8D]|\xe2\x80\xa8|\xe2\x80\xa9|\xe2\x80\xaF|\xe2\x81\x9f|\xe2\x81\xa0|\xe3\x80\x80|\xef\xbb\xbf)+/",
-      "-",$str);
+      "/(\t|\n|\v|\f|\r| |\xC2\x85|\xc2\xa0|\xe1\xa0\x8e|\xe2\x80[\x80-\x8D]|\xe2\x80\xa8|\xe2\x80\xa9|\xe2\x80\xaF|\xe2\x81\x9f|\xe2\x81\xa0|\xe3\x80\x80|\xef\xbb\xbf)+/","-",$str);
     return time().'-'.$cleanedstr;    
   }
 
@@ -578,8 +592,16 @@ class FormBuild extends Connection {
 		$result = $this->dbc->query($sql2); # Create the query for the function 
 		$num = $result->num_rows; # see if we get any results back 
 
-		if ( !isset($_GET['currentpage']) ) {  $pagination_link = $_SERVER['REQUEST_URI'];}
-		else {$pagination_link = str_replace("/".basename($_SERVER['REQUEST_URI']),'',$_SERVER['REQUEST_URI']);}
+
+
+    if ( !isset($_GET['currentpage']) ) {  
+      //$pagination_link = $_SERVER['REQUEST_URI'];
+      $pagination_link = '/wu-art/peep.php';
+    }
+		else {
+      $pagination_link = '/wu-art/peep.php';
+      //$pagination_link = str_replace("/".basename($_SERVER['REQUEST_URI']),'',$_SERVER['REQUEST_URI']);
+    }
 
 
 		if($num > 0)
@@ -604,34 +626,34 @@ class FormBuild extends Connection {
 						echo '<div role="toolbar" class="btn-toolbar" style="margin-top: 20px;margin-bottom: 10px;"><div class="btn-group">';
 						if ($currentpage > 1)
 						{
-							echo '<a class="btn btn-default" href="'.$pagination_link.'1">First</a>';
+							echo '<a class="btn btn-default" href="'.$pagination_link.'?currentpage=1">First</a>';
 							$prevpage = $currentpage - 1;
-							echo '<a class="btn btn-default" href="'.$pagination_link.''.$prevpage.'">Prev</a>';
+							echo '<a class="btn btn-default" href="'.$pagination_link.'?currentpage='.$prevpage.'">Prev</a>';
 						}	
 						if ($currentpage <= 1){
-							echo '<a class="btn btn-default disabled" href="'.$pagination_link.'1">First</a>';
+							echo '<a class="btn btn-default disabled" href="'.$pagination_link.'?currentpage=1">First</a>';
 							$prevpage = $currentpage - 1;
-							echo '<a class="btn btn-default disabled" href="'.$pagination_link.''.$prevpage.'">Prev</a>';
+							echo '<a class="btn btn-default disabled" href="'.$pagination_link.'?currentpage='.$prevpage.'">Prev</a>';
 						}
 						// loop to show links to range of pages around current page
 						for ($x = (($currentpage - $range) - 1); $x < (($currentpage + $range) + 1); $x++)
 						{
 							if (($x > 0) && ($x <= $totalpages))
 							{
-								if ($x == $currentpage) { echo '<a class="btn btn-default active disabled" href="'.$pagination_link.'1">'.$x.'</a>'; }
-								else { echo '<a class="btn btn-default" href="'.$pagination_link.''.$x.'">'.$x.'</a>'; }
+								if ($x == $currentpage) { echo '<a class="btn btn-default active disabled" href="'.$pagination_link.'?currentpage=1">'.$x.'</a>'; }
+								else { echo '<a class="btn btn-default" href="'.$pagination_link.'?currentpage='.$x.'">'.$x.'</a>'; }
 							} 
 						}
 						if ($currentpage != $totalpages)
 						{
 							$nextpage = $currentpage + 1;
-							echo '<a class="btn btn-default" href="'.$pagination_link.''.$nextpage.'">Next</a>';
-							echo '<a class="btn btn-default" href="'.$pagination_link.''.$totalpages.'">Last</a>';
+							echo '<a class="btn btn-default" href="'.$pagination_link.'?currentpage='.$nextpage.'">Next</a>';
+							echo '<a class="btn btn-default" href="'.$pagination_link.'?currentpage='.$totalpages.'">Last</a>';
 						}
 						else
 						{
-							echo '<a class="btn btn-default disabled" href="'.$pagination_link.''.$totalpages.'">Next</a>';	
-							echo '<a class="btn btn-default disabled" href="'.$pagination_link.''.$totalpages.'">Last</a>';
+							echo '<a class="btn btn-default disabled" href="'.$pagination_link.'?currentpage='.$totalpages.'">Next</a>';	
+							echo '<a class="btn btn-default disabled" href="'.$pagination_link.'?currentpage='.$totalpages.'">Last</a>';
 						}					
 						echo '</div></div><div class="clear clearfix"></div>';
 					}
@@ -661,7 +683,7 @@ class FormBuild extends Connection {
         }
         else { $art_file = ''; }
 
-        if($info->media_type === 1){
+        if($info->media_type == 1){
           $media = 'Art';
         }
         else {
@@ -675,6 +697,145 @@ class FormBuild extends Connection {
           <td class="edit">'.$info->submit_date.'</td>
           <td class="delete">'.$media.'</td>
           <td class="edit">'.$info->full_name.'</td>
+          <td class="edit">'.$info->country_id.'</td>
+        </tr>
+        ';
+      } // end While
+      echo '
+        </tbody>
+      </table>
+      ';
+    } // end IF
+  }
+
+
+
+
+  function get_info_sony(){ 
+    $sql = "SELECT id, full_name, email_address, phone_number, address_1, address_2, country_id, city_name, state_abbreviation, zipcode, media_type, art_file, submit_date FROM wutatart ORDER BY submit_date DESC"; 
+		
+		$result_count = $this->dbc->query($sql);
+		$numrows 			= $result_count->num_rows;
+		$rowsperpage 	= 20;
+		$totalpages 	= ceil($numrows / $rowsperpage);
+
+
+		if (isset($_GET['currentpage']) && is_numeric($_GET['currentpage'])) { $currentpage = (int) $_GET['currentpage']; }
+		else{ $currentpage = 1; }
+		if ($currentpage > $totalpages)	{ $currentpage = $totalpages; }
+		if ($currentpage < 1){ $currentpage = 1; }
+		$offset = ($currentpage - 1) * $rowsperpage;
+		
+		
+		$sql2 = $sql." LIMIT $offset, $rowsperpage";
+
+
+		$result = $this->dbc->query($sql2); # Create the query for the function 
+		$num = $result->num_rows; # see if we get any results back 
+
+
+
+    if ( !isset($_GET['currentpage']) ) {  
+      //$pagination_link = $_SERVER['REQUEST_URI'];
+      $pagination_link = '/wu-art/sony.php';
+    }
+		else {
+      $pagination_link = '/wu-art/sony.php';
+      //$pagination_link = str_replace("/".basename($_SERVER['REQUEST_URI']),'',$_SERVER['REQUEST_URI']);
+    }
+
+
+		if($num > 0)
+		{
+			
+
+			echo '
+			<div class="row">
+                <div class="col-sm-12">
+                    <h3 style="margin-top:0;margin-bottom:0;">There are currently '.number_format($numrows).' uploads in the system</h3>
+                </div>
+			</div>
+			';
+
+
+			echo '
+				<div class="row">
+					<div class="col-sm-12 col-xs-12">';
+					if($totalpages > 1)
+					{
+						$range = 3;
+						echo '<div role="toolbar" class="btn-toolbar" style="margin-top: 20px;margin-bottom: 10px;"><div class="btn-group">';
+						if ($currentpage > 1)
+						{
+							echo '<a class="btn btn-default" href="'.$pagination_link.'?currentpage=1">First</a>';
+							$prevpage = $currentpage - 1;
+							echo '<a class="btn btn-default" href="'.$pagination_link.'?currentpage='.$prevpage.'">Prev</a>';
+						}	
+						if ($currentpage <= 1){
+							echo '<a class="btn btn-default disabled" href="'.$pagination_link.'?currentpage=1">First</a>';
+							$prevpage = $currentpage - 1;
+							echo '<a class="btn btn-default disabled" href="'.$pagination_link.'?currentpage='.$prevpage.'">Prev</a>';
+						}
+						// loop to show links to range of pages around current page
+						for ($x = (($currentpage - $range) - 1); $x < (($currentpage + $range) + 1); $x++)
+						{
+							if (($x > 0) && ($x <= $totalpages))
+							{
+								if ($x == $currentpage) { echo '<a class="btn btn-default active disabled" href="'.$pagination_link.'?currentpage=1">'.$x.'</a>'; }
+								else { echo '<a class="btn btn-default" href="'.$pagination_link.'?currentpage='.$x.'">'.$x.'</a>'; }
+							} 
+						}
+						if ($currentpage != $totalpages)
+						{
+							$nextpage = $currentpage + 1;
+							echo '<a class="btn btn-default" href="'.$pagination_link.'?currentpage='.$nextpage.'">Next</a>';
+							echo '<a class="btn btn-default" href="'.$pagination_link.'?currentpage='.$totalpages.'">Last</a>';
+						}
+						else
+						{
+							echo '<a class="btn btn-default disabled" href="'.$pagination_link.'?currentpage='.$totalpages.'">Next</a>';	
+							echo '<a class="btn btn-default disabled" href="'.$pagination_link.'?currentpage='.$totalpages.'">Last</a>';
+						}					
+						echo '</div></div><div class="clear clearfix"></div>';
+					}
+			echo '		
+					</div>		
+      ';
+
+      echo '
+      <table class="table table-hover" cellspacing="0" cellpadding="0" border="0">
+        <thead>
+            <tr>
+                <th class="col-xs-2">ID</th>
+                <th>IMG</th>
+                <th>TYPE</th>
+                <th>COUNTRY</th>
+            </tr>
+        </thead>
+        <tbody>
+      ';
+			while ($info = mysqli_fetch_object($result)) 
+			{      
+        
+        //id, full_name, email_address, phone_number, address_1, address_2, country_id, city_name, state_abbreviation, zipcode, media_type, art_file, submit_date
+        if($info->art_file){
+            $art_file = '<a href="#" class="pop"><img src="/wu-art/files/'.$info->art_file.'" style="width:100%;" /></a>';
+        }
+        else { $art_file = ''; }
+
+        if($info->media_type == 1){
+          $media = 'Art';
+        }
+        else {
+          $media = 'Tattoo';
+        }
+
+        // <td>'.date('m/d/Y',$info->summaryDateTime).'</td>
+        echo '
+        <tr>
+          <td class="edit">'.$info->id.'</td>
+          <td class="edit">'.$art_file.'</td>
+          <td class="delete">'.$media.'</td>
           <td class="edit">'.$info->country_id.'</td>
         </tr>
         ';
